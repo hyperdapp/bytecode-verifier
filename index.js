@@ -43,9 +43,9 @@ const compiler_question = [
 ]
 program
   .version('0.2.1')
-  .description('=========  Ethereum Bytecode Verifier  ==========='+'\n'+
+  .description('=========  Theos Bytecode Verifier  ==========='+'\n'+
   chalk.yellow(
-		figlet.textSync('eth-Verifier',{horizontalLayout:'default'})
+		figlet.textSync('theos-Verifier',{horizontalLayout:'default'})
   )+'\n'+'   ===============================================')
   .option('-l, --list', 'list of formal released Solidity Compiler')
 
