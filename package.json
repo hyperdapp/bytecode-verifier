@@ -5,7 +5,7 @@
   "main": "test.js",
   "preferGlobal": true,
   "bin": {
-    "ethv": "./index.js"
+    "tevy": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,6 +22,7 @@
     "jsdom": "^11.2.0",
     "mongoose": "^4.11.13",
     "solc": "^0.4.16",
+    "theos-bytecode-verifier": "git+https://github.com/hyperdapp/bytecode-verifier.git",
     "web3": "^1.0.0-beta.22",
     "web3-core-requestmanager": "^1.0.0-beta.22"
   },
