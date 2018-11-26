@@ -59,19 +59,19 @@ program
     }
     else{
       console.log('You\'ve chosen: '+chainChoice);
-      
+
       const net_to_provider = {
-        'mainnet':'https://mainnet.infura.io',
-        'ropsten': 'https://ropsten.infura.io',
-        'kovan': 'https://kovan.infura.io',
-        'rinkeby': 'https://rinkeby.infura.io',
+        'main':'https://chain.hyperdapp.org',
+        'ashoka': 'https://ashoka.hyperdapp.org',
+        'shivaji': 'https://shivaji.hyperdapp.org',
+        'chola': 'https://chola.hyperdapp.org',
       }
-      
-      if (chainChoice == 'mainnet' || chainChoice == 'ropsten'
-        || chainChoice=='kovan' || chainChoice== 'rinkeby'){
-        
+
+      if (chainChoice == 'main' || chainChoice == 'ashoka'
+        || chainChoice=='shivaji' || chainChoice== 'chola'){
+
         var provider = net_to_provider[chainChoice];
-        // After confirming the chain choice, prompt question. 
+        // After confirming the chain choice, prompt question.
         prompt(verifier_question)
           .then( (answers) =>{
           answers['file_folder'] = process.cwd();
@@ -83,8 +83,8 @@ program
       }
       else{
         console.log(chalk.red.bold('Invalid chain choice')+' Your current choice is by default: mainchain');
-        console.log(chalk.green.bold('Please choose from: ')+chalk.underline('mainnet')+' , '+chalk.underline('ropsten')+' , '+
-        chalk.underline('kovan')+' , '+chalk.underline('rinkeby'));
+        console.log(chalk.green.bold('Please choose from: ')+chalk.underline('main')+' , '+chalk.underline('ashoka')+' , '+
+        chalk.underline('shivaji')+' , '+chalk.underline('chola'));
       }
     }
   });
@@ -107,5 +107,3 @@ program
   program.parse(process.argv);
 
   if (program.list) solcVersionList();
-  
-  
