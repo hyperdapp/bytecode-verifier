@@ -5,7 +5,7 @@
   "main": "test.js",
   "preferGlobal": true,
   "bin": {
-    "tevy": "./index.js"
+    "tevr": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
