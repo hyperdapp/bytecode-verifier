@@ -1,34 +1,11 @@
 {
-  "name": "theos-bytecode-verifier",
+  "name": "theos-bytecode-verify",
   "version": "0.2.2",
-  "description": "The purpose of this tool is to verify that the Contract Source on etherscan matches the bytecode that's actually on the blockchain. If the code shown on etherscan does not match the blockchain, the tool will display a warning message.",
-  "main": "test.js",
-  "preferGlobal": true,
-  "bin": {
-    "tevr": "./index.js"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Alex Luoyuan Xiong",
+  "description": "hyperdapp contract.",
+  "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^2.1.0",
-    "commander": "^2.11.0",
-    "express": "^4.15.5",
-    "figlet": "^1.2.0",
-    "inquirer": "^3.3.0",
-    "jquery": "^3.2.1",
-    "jsdom": "^11.2.0",
-    "mongoose": "^4.11.13",
     "solc": "^0.4.16",
-    "theos-bytecode-verifier": "git+https://github.com/hyperdapp/bytecode-verifier.git",
-    "web3": "^1.0.0-beta.22",
-    "web3-core-requestmanager": "^1.0.0-beta.22"
-  },
-  "devDependencies": {
-    "gulp": "^3.9.1"
-  },
-  "repository": "https://github.com/ConsenSys/bytecode-verifier",
-  "private": null
+    "web3": "^1.0.0-beta.22"
+  }
 }
