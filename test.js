@@ -1,5 +1,5 @@
 const solc = require('solc');
-const Web3 = require('web3');
+const Web4 = require('web4');
 const fs = require('fs');
 
 var solc_version = 'v0.4.4+commit.4633f3de';
@@ -9,7 +9,7 @@ var is_optimized = 1;
 var provider = 'https://mainnet.infura.io';
 var file_folder = process.cwd();
 
-var web3 = new Web3( new Web3.providers.HttpProvider(provider));
+var web4 = new Web4( new Web4.providers.HttpProvider(provider));
 
 var file_path = file_folder +'/'+file_name;
 var input = fs.readFileSync(file_path,'utf8');
