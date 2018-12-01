@@ -2,7 +2,7 @@
 // content of index.js
 const fs = require('fs');
 const solc = require('solc');
-const Web4 = require('web4js');
+const Web3 = require('web3');
 var express = require('express')
 var bodyParser = require('body-parser')
 
@@ -36,7 +36,7 @@ app.use(function (req, res) {
     res.end("Error")
   }
 
-  const web4 = new Web4( new Web4.providers.HttpProvider( net_to_provider[post_data.chain] ));
+  const web3 = new Web3( new Web3.providers.HttpProvider( net_to_provider[post_data.chain] ));
 
   function verifyContract(event,res) {
     try{
@@ -131,8 +131,8 @@ app.use(function (req, res) {
  }//Func end
 
  function testify_with_blochchain(solc_version, contract_address){
-   // using web4 getCode function to read from blockchain
-   web4.tim.getCode(contract_address)
+   // using web3 getCode function to read from blockchain
+   web3.eth.getCode(contract_address)
 
 
    .then(output =>{
