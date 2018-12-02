@@ -5,9 +5,9 @@ const solc = require('solc');
 const Web3 = require('web3');
 var express = require('express')
 var bodyParser = require('body-parser')
-
+var AWS = require('aws-sdk');
 var cors = require('cors')
-
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 
 const app = express()
@@ -20,6 +20,9 @@ const port = 5000
 
 
 app.use(function (req, res) {
+  res.setHeader("Access-Control-Allow-Origin", '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Accept');
   var post_data =( req.body);
 
   if(Object.keys(post_data).length == 0){
@@ -30,15 +33,18 @@ app.use(function (req, res) {
 		console.log("Post Data Exist",post_data,Object.keys(post_data).length)
 	}
 
+  var web3 = new Web3( new Web3.providers.HttpProvider( net_to_provider[post_data.chain] ));
+
   try {
     verifyContract(post_data,res);
   } catch (ex) {
     res.end("Error")
   }
 
-  const web3 = new Web3( new Web3.providers.HttpProvider( net_to_provider[post_data.chain] ));
+
 
   function verifyContract(event,res) {
+    var   bytecode_from_compiler, interface_from_compiler;
     try{
 
       console.log("Chain: ", net_to_provider[event.chain] );
@@ -50,8 +56,8 @@ app.use(function (req, res) {
       var runs = event.runs;
       var cname = event.name;
 
-      if (true){
-        var solc_version = 'v0.4.4+commit.4633f3de';
+      if (false){
+        var solc_version = 'v0.4.4+commit.4633f3de.js';
         var file_name = 'MultiSigWallet.sol';
         var contract_address = '0x7da82c7ab4771ff031b66538d2fb9b0b047f6cf9';
         var is_optimized = 1;
@@ -62,7 +68,8 @@ app.use(function (req, res) {
         var cname = 'MultiSigWallet';
       }
 
-
+      solc_version = solc_version.slice(0,solc_version.length-3).slice(8,solc_version.length-3)
+      console.log("SOLC;", solc_version)
       solc.loadRemoteVersion(solc_version, function(err, solc_specific){
         if(err){
           console.log('Solc failed to loaded'+err);
@@ -70,6 +77,8 @@ app.use(function (req, res) {
 
        // if solc successfully loaded, compile the contract and get the JSON output
        var output = solc_specific.compile(input, is_optimized);
+
+
        // get bytecode from JSON output
        //console.log('Solc  >>> ', output);
 
@@ -83,6 +92,7 @@ app.use(function (req, res) {
          }
 
          var bytecode = output['contracts'][cname]['runtimeBytecode'];
+         interface_from_compiler = output['contracts'][cname]['interface']
        }
        else{
          if(typeof output['contracts'][':'+cname] === 'undefined' ){
@@ -90,6 +100,8 @@ app.use(function (req, res) {
            return
          }
          var bytecode = output['contracts'][':'+cname]['runtimeBytecode'];
+         interface_from_compiler = output['contracts'][':'+cname]['interface']
+
        }
 
        if (parseInt(solc_version.match(/v\d+?\.\d+?\.\d+?[+-]/gi)[0].match(/\.\d+/g)[0].slice(1)) >= 4
@@ -113,24 +125,54 @@ app.use(function (req, res) {
        else{
          bytecode_from_compiler = '0x'+bytecode;
        }
+       //console.log("@@@@@@@@@@@",testify_with_blochchain(solc_version, contract_address,event) )
        // testify with result from blockchain until the compile finishes.
-       var bytecode_from_blockchain = testify_with_blochchain(solc_version, contract_address);
+      //bytecode_from_blockchain =
+       testify_with_blochchain(bytecode_from_compiler,event,interface_from_compiler);
 
 
-
-       if (bytecode_from_blockchain == bytecode_from_compiler)
-        res.end(JSON.stringify({bc:address}));
-      else
-        res.end(JSON.stringify({bc:"NA"}));
-
+      /*
+       if (bytecode_from_blockchain == bytecode_from_compiler){
+         res.end(JSON.stringify({bc:address}));
+         updateABI(address,interface_from_compiler.toString());
+       }
+       else{
+         console.log(">>>>",bytecode_from_blockchain)
+         console.log("####",bytecode_from_compiler)
+         res.end(JSON.stringify({bc:"NA"}));
+       }
+       */
      });
    } catch (ex) {
+     console.log("Err", ex)
     res.end(ex);
   }
 
  }//Func end
 
- function testify_with_blochchain(solc_version, contract_address){
+ function updateABI(key,data){
+
+   var params = {
+     TableName : 'hdcontract',
+     Item: {
+        a: key,
+        abi: data
+     }
+   };
+
+   //console.log(">", dynamodb)
+   //var docClient = dynamodb.DocumentClient({ service: dynamodb });
+
+   docClient.put(params, function(err, data) {
+     if (err) console.log(err);
+     else console.log(data);
+   });
+
+ }
+
+function testify_with_blochchain(bytecode_from_compiler, post_data, interface_from_compiler){
+  var solc_version = post_data.compilerVersion, contract_address = post_data.adr ;
+   web3 = new Web3( new Web3.providers.HttpProvider( net_to_provider[post_data.chain] ));
    // using web3 getCode function to read from blockchain
    web3.eth.getCode(contract_address)
 
@@ -138,6 +180,8 @@ app.use(function (req, res) {
    .then(output =>{
      if (parseInt(solc_version.match(/v\d+?\.\d+?\.\d+?[+-]/gi)[0].match(/\.\d+/g)[0].slice(1)) >= 4
       && parseInt(solc_version.match(/v\d+?\.\d+?\.\d+?[+-]/gi)[0].match(/\.\d+/g)[1].slice(1)) >= 7){
+        console.log("=========>", parseInt(solc_version.match(/v\d+?\.\d+?\.\d+?[+-]/gi)[0].match(/\.\d+/g)[0].slice(1)) );
+
        // code stored at the contract address has no constructor or contract creation bytecode,
        // only with swarm metadata appending at the back, therefore to get the actual deployed bytecode,
        // just slice out the trailing swarm metadata.
@@ -151,10 +195,21 @@ app.use(function (req, res) {
      }
      // if the solc version is less than 0.4.7, then just directly compared the two.
      else{
+       console.log("=1========>", parseInt(solc_version.match(/v\d+?\.\d+?\.\d+?[+-]/gi)[0].match(/\.\d+/g)[0].slice(1)) );
+       console.log(">L>", output)
        bytecode_from_blockchain = output;
-
+       //return output;
      }
-     return bytecode_from_blockchain;
+     if (bytecode_from_blockchain == bytecode_from_compiler){
+       res.end(JSON.stringify({bc:contract_address}));
+       updateABI(contract_address,interface_from_compiler.toString());
+     }
+     else{
+       console.log(">>>>",bytecode_from_blockchain)
+       console.log("####",bytecode_from_compiler)
+       res.end(JSON.stringify({bc:"Error"}));
+     }
+
    })
    .catch(function (err) {
       console.log({message: 'Failed to check for transaction receipt:', data: err});
@@ -180,4 +235,5 @@ const net_to_provider = {
         '2': 'https://ashoka.hyperdapp.org',
         '3': 'https://shivaji.hyperdapp.org',
         '4': 'https://chola.hyperdapp.org',
+        '5': 'https://mainnet.infura.io',
       }
