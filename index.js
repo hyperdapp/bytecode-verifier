@@ -235,5 +235,5 @@ const net_to_provider = {
         '2': 'https://ashoka.hyperdapp.org',
         '3': 'https://shivaji.hyperdapp.org',
         '4': 'https://chola.hyperdapp.org',
-        '5': 'https://mainnet.infura.io',
+        '5': 'https://ethtest.hyperdapp.org',
       }
